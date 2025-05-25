@@ -1,70 +1,73 @@
-# Getting Started with Create React App
+# 설정 파일
+## .env
+OAUTH2 관련 설정 관리하는 파일
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 뷰
+## App.js
+``` JavaScript
+<Router>
+    <nav style={{ padding: '10px', backgroundColor: '#f0f0f0', borderBottom: '1px solid #ccc' }}>
+        <Link to="/home" style={{ marginRight: '15px' }}>홈</Link>
+        {/* <Link to="/login">로그인</Link> // 로그인 시작 페이지가 있다면 */}
+    </nav>
+    <Routes>
+        <Route path="/" element={<HomePage />} /> {/* 초기 경로를 HomePage로 설정 */}
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} /> {/* 백엔드에서 리다이렉트될 경로 */}
+        {/* <Route path="/login" element={<LoginPage />} /> */}
+        {/* 필요에 따라 다른 라우트 추가 */}
+    </Routes>
+</Router>
+```
 
-## Available Scripts
+## HomePage.js
+localStorage 변수에 담긴 토큰 값 확인 후 분기
+``` JavaScript
+    {isLoggedIn ? (
+        <div>
+            <p>로그인되었습니다. 내 정보를 확인하세요!</p>
+            <button onClick={() => {
+                localStorage.removeItem('jwtToken');
+                window.location.reload(); // 로그아웃 후 페이지 새로고침
+            }}>로그아웃</button>
+            {/* 로그인 후 보여줄 다른 컨텐츠 */}
+        </div>
+    ) : (
+        <div>
+            <p>서비스를 이용하시려면 로그인해주세요.</p>
+            {/* 카카오 로그인 버튼 */}
+            <button
+                onClick={handleKakaoLogin}
+                style={{
+                    padding: '10px 20px',
+                    fontSize: '18px',
+                    backgroundColor: '#FEE500', // 카카오 브랜드 색상
+                    color: '#3C1E1E',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                }}
+            >
+                카카오 로그인
+            </button>
+        </div>
+    )}
+```
 
-In the project directory, you can run:
+## OAuth2RedirectHandler.js
+백엔드 서버에서 로그인 완료 후 리다이렉트로 /oauth2/redirect 경로로 이동하면 추가 작업 실행
+``` javaScript
+    if (token) {
+        // JWT 토큰이 존재하면 로컬 스토리지에 저장
+        localStorage.setItem('jwtToken', token);
+        console.log('JWT Token received and stored:', token.substring(0, 30) + '...');
 
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+        // 로그인 성공 후, 서비스의 메인 페이지나 대시보드 페이지로 이동
+        navigate('/home'); // 예: /home 또는 /dashboard
+    } else {
+        // 토큰이 없으면 로그인 실패로 간주하고 로그인 페이지로 리다이렉트하거나 오류 페이지 표시
+        console.error('JWT Token not received in URL.');
+        navigate('/login'); // 예: 로그인 페이지로 다시 이동
+    }
+```
