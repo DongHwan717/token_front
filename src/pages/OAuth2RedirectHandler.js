@@ -8,12 +8,14 @@ function OAuth2RedirectHandler() {
     useEffect(() => {
         // URL의 쿼리 파라미터(예: ?token=abc.xyz.123)를 파싱합니다.
         const urlParams = new URLSearchParams(location.search);
-        const token = urlParams.get('token'); // 'token'이라는 이름의 파라미터 값 가져오기
+        const accesstoken = urlParams.get('accessToken'); // 'token'이라는 이름의 파라미터 값 가져오기
+        const refreshtoken = urlParams.get('refreshToken'); // 'refreshToken'이라는 이름의 파라미터 값 가져오기
 
-        if (token) {
+        if (accesstoken) {
             // JWT 토큰이 존재하면 로컬 스토리지에 저장
-            localStorage.setItem('jwtToken', token);
-            console.log('JWT Token received and stored:', token.substring(0, 30) + '...');
+            localStorage.setItem('accessToken'  , accesstoken);
+            localStorage.setItem('refreshToken' , refreshtoken);
+            console.log('JWT Token received and stored:', accesstoken.substring(0, 30) + '...');
 
             // 로그인 성공 후, 서비스의 메인 페이지나 대시보드 페이지로 이동
             navigate('/home'); // 예: /home 또는 /dashboard
