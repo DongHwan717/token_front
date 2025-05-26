@@ -10,7 +10,7 @@ function HomePage() {
     };
 
     // 현재 로그인 상태를 확인하는 예시 (실제 앱에서는 JWT 유효성 검사 필요)
-    const isLoggedIn = localStorage.getItem('jwtToken');
+    const isLoggedIn = localStorage.getItem('accessToken');
 
     return (
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
@@ -19,7 +19,8 @@ function HomePage() {
                 <div>
                     <p>로그인되었습니다. 내 정보를 확인하세요!</p>
                     <button onClick={() => {
-                        localStorage.removeItem('jwtToken');
+                        localStorage.removeItem('accessToken'); // JWT 토큰 제거
+                        localStorage.removeItem('refreshToken'); // JWT 토큰 제거
                         window.location.reload(); // 로그아웃 후 페이지 새로고침
                     }}>로그아웃</button>
                     {/* 로그인 후 보여줄 다른 컨텐츠 */}
