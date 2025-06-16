@@ -71,3 +71,76 @@ localStorage 변수에 담긴 토큰 값 확인 후 분기
         navigate('/login'); // 예: 로그인 페이지로 다시 이동
     }
 ```
+# 파일 업로드
+## file.js
+``` javaScript
+    function FilePage() {
+
+        const fileUrl = process.env.REACT_APP_BACKEND_FILE_URL;
+
+        // <input type="file" ref={fileInputRef} /> ref로 파일 요소를 fileInputRef에 담는다.
+        const fileInputRef = useRef(null);
+        const isLoggedIn = localStorage.getItem('accessToken');
+
+        // 토큰이 없으면 로그인 페이지로 이동
+        if (!isLoggedIn) {
+            window.location.href = '/';
+            return null;
+        }
+
+        const handleUpload = async () => {
+            const file = fileInputRef.current.files[0];
+            const validation = validateFile(file);
+            if (!validation.isValid) {
+                alert(validation.message);
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                await axios.post(fileUrl+'/upload', formData, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+                alert('업로드 성공!');
+            } catch (error) {
+                if(error.status === 403) {
+                    // 토큰 만료되면 로그인 유도
+                    window.location.href = '/'
+                } else if(error.status === 400) {
+                    alert('파일 업로드 실패: ' + error.response.data.message);
+                }
+            }
+        };
+        ...
+
+    }
+```
+## FileValidator.js
+``` javaScript
+    // src/utils/fileValidator.js
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'pdf']; // 허용되는 확장자
+
+    export const validateFile = (file) => {
+    if (!file) {
+        return { isValid: false, message: '파일을 선택해주세요.' };
+    }
+
+    // 1. 용량 검사
+    if (file.size > MAX_FILE_SIZE) {
+        //return { isValid: false, message: `파일 용량이 너무 큽니다. (최대 ${MAX_FILE_SIZE / (1024 * 1024)}MB)` };
+    }
+
+    // 2. 확장자 검사
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
+        //return { isValid: false, message: `허용되지 않는 파일 형식입니다. (${ALLOWED_EXTENSIONS.join(', ')})` };
+    }
+
+    // 모든 검증 통과
+    return { isValid: true, message: '파일 검증 통과.' };
+    };
+```
